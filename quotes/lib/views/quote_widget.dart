@@ -3,8 +3,9 @@ import 'package:quotes/models/quote_model.dart';
 
 class QuoteWidget extends StatelessWidget {
   final QuoteModel? quote;
+  final VoidCallback? onLiked;
 
-  QuoteWidget({required this.quote});
+  QuoteWidget({required this.quote, this.onLiked});
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,10 @@ class QuoteWidget extends StatelessWidget {
         Text(
           '- ${quote!.author}',
           style: TextStyle(fontSize: 16),
+        ),
+        IconButton(
+          icon: Icon(quote!.isLiked ? Icons.favorite : Icons.favorite_border),
+          onPressed: onLiked,
         ),
       ],
     );
