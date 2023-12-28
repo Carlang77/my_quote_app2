@@ -77,7 +77,6 @@ class _QuoteScreenState extends State<QuoteScreen> {
             fontWeight: FontWeight.bold, // Make the text bolder
             fontSize: 35,
             color: Colors.grey,
-            //
           ),
         ),
         actions: [
@@ -107,14 +106,14 @@ class _QuoteScreenState extends State<QuoteScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 16.0),
         child: Center(
           child: currentQuote != null
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Image.asset(
-                      'assets/images/quotes.png', //  local asset reference
+                      'assets/images/quotes.png', // local asset reference
                       width: 80, // Adjusts the width as needed
                       height: 80, // Adjusts the height as needed
                     ),
