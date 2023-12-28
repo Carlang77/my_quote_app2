@@ -13,12 +13,16 @@ class LikedQuotesScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Liked Quotes'),
       ),
-      body: ListView.builder(
-        itemCount: likedQuotes.length,
-        itemBuilder: (context, index) {
-          final quote = likedQuotes[index];
-          return QuoteWidget(quote: quote);
-        },
+      body: Container(
+        margin:
+            EdgeInsets.symmetric(horizontal: 16), // Add left and right margins
+        child: ListView.builder(
+          itemCount: likedQuotes.length,
+          itemBuilder: (context, index) {
+            final quote = likedQuotes[index];
+            return QuoteWidget(quote: quote);
+          },
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:quotes/controllers/quote_controller.dart';
 import 'package:quotes/views/quote_widget.dart';
 import 'package:quotes/models/quote_model.dart';
 import 'package:quotes/liked_quotes_screen.dart';
+import 'package:share/share.dart'; // Import the share package
 
 class QuoteScreen extends StatefulWidget {
   @override
@@ -21,10 +22,26 @@ class _QuoteScreenState extends State<QuoteScreen> {
   }
 
   Future<void> _reloadQuote() async {
-    var newQuote = await _fetchQuote();
-    setState(() {
-      currentQuote = newQuote;
-    });
+    try {
+      var newQuote = await _controller.fetchQuote();
+      if (newQuote != null) {
+        setState(() {
+          currentQuote = newQuote;
+        });
+      } else {
+        // Display a default quote or message when there's no internet connection
+        setState(() {
+          currentQuote = QuoteModel(
+              content:
+                  "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote",
+              author: "",
+              isLiked: false);
+        });
+      }
+    } catch (error) {
+      print('Error fetching quote: $error');
+      // Handle error state, possibly setting currentQuote to an error message
+    }
   }
 
   Future<QuoteModel?> _fetchQuote() async {
@@ -54,7 +71,15 @@ class _QuoteScreenState extends State<QuoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daily Quote'),
+        title: Text(
+          'Daily Quotes',
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // Make the text bolder
+            fontSize: 35,
+            color: Colors.grey,
+            //
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.list),
@@ -62,9 +87,21 @@ class _QuoteScreenState extends State<QuoteScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        LikedQuotesScreen(likedQuotes: likedQuotes)),
+                  builder: (context) =>
+                      LikedQuotesScreen(likedQuotes: likedQuotes),
+                ),
               );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              if (currentQuote != null) {
+                Share.share(
+                  '${currentQuote!.content} - ${currentQuote!.author}',
+                  subject: 'Quote from Daily Quote App',
+                );
+              }
             },
           ),
         ],
@@ -72,7 +109,19 @@ class _QuoteScreenState extends State<QuoteScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
+          child: currentQuote != null
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/images/quotes.png', //  local asset reference
+                      width: 80, // Adjusts the width as needed
+                      height: 80, // Adjusts the height as needed
+                    ),
+                    QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
+                  ],
+                )
+              : CircularProgressIndicator(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
