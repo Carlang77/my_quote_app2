@@ -66,13 +66,27 @@ class _QuoteScreenState extends State<QuoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Daily Quotes',
-          style: TextStyle(
-            fontWeight: FontWeight.bold, // Make the text bolder
-            fontSize: 35,
-            color: Colors.grey,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Daily Quotes',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 40, // Adjust the font size if needed
+                  color: Colors.black,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Image.asset(
+              'assets/images/EEK_Logo.png',
+              fit: BoxFit.contain,
+              height: 32,
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -108,9 +122,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Image.asset(
-                      'assets/images/quotes.png', // local asset reference
-                      width: 80, // Adjusts the width as needed
-                      height: 80, // Adjusts the height as needed
+                      'assets/images/quotes.png',
+                      width: 80,
+                      height: 80,
                     ),
                     QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
                   ],
