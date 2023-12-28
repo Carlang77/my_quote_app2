@@ -12,12 +12,8 @@ class QuoteController {
   Future<QuoteModel> fetchQuote() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
-      // Return a special QuoteModel with custom message when offline
-      return QuoteModel(
-          content:
-              "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote",
-          author: "",
-          isLiked: false);
+      // Throw an exception when offline
+      throw Exception('No internet connection');
     }
 
     try {

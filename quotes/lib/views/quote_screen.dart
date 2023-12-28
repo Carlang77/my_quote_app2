@@ -24,23 +24,18 @@ class _QuoteScreenState extends State<QuoteScreen> {
   Future<void> _reloadQuote() async {
     try {
       var newQuote = await _controller.fetchQuote();
-      if (newQuote != null) {
-        setState(() {
-          currentQuote = newQuote;
-        });
-      } else {
-        // Display a default quote or message when there's no internet connection
-        setState(() {
-          currentQuote = QuoteModel(
-              content:
-                  "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote",
-              author: "",
-              isLiked: false);
-        });
-      }
+      setState(() {
+        currentQuote = newQuote;
+      });
     } catch (error) {
       print('Error fetching quote: $error');
-      // Handle error state, possibly setting currentQuote to an error message
+      setState(() {
+        currentQuote = QuoteModel(
+            content:
+                "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote. :)",
+            author: "Carlang :)",
+            isLiked: false);
+      });
     }
   }
 
