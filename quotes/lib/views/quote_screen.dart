@@ -117,15 +117,8 @@ class _QuoteScreenState extends State<QuoteScreen> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 16.0),
         child: Center(
-          child: FutureBuilder<QuoteModel?>(
-            future: _fetchQuote(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(); // Show loading indicator
-              } else if (snapshot.hasError) {
-                return Text("Error: ${snapshot.error}"); // Show error message
-              } else if (snapshot.hasData) {
-                return Column(
+          child: currentQuote != null
+              ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Image.asset(
@@ -133,15 +126,10 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       width: 80,
                       height: 80,
                     ),
-                    QuoteWidget(quote: snapshot.data, onLiked: _toggleLike),
+                    QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
                   ],
-                );
-              } else {
-                return Text(
-                    "No quote found"); // Handle the case when no data is returned
-              }
-            },
-          ),
+                )
+              : CircularProgressIndicator(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
