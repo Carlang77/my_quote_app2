@@ -32,7 +32,7 @@ class _QuoteScreenState extends State<QuoteScreen> {
       setState(() {
         currentQuote = QuoteModel(
             content:
-                "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote. :)",
+                "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote.",
             author: "Carlang :)",
             isLiked: false);
       });
@@ -117,8 +117,15 @@ class _QuoteScreenState extends State<QuoteScreen> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 35.0, vertical: 16.0),
         child: Center(
-          child: currentQuote != null
-              ? Column(
+          child: FutureBuilder<QuoteModel?>(
+            future: _fetchQuote(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // Show loading indicator
+              } else if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}"); // Show error message
+              } else if (snapshot.hasData) {
+                return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Image.asset(
@@ -126,10 +133,15 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       width: 80,
                       height: 80,
                     ),
-                    QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
+                    QuoteWidget(quote: snapshot.data, onLiked: _toggleLike),
                   ],
-                )
-              : CircularProgressIndicator(),
+                );
+              } else {
+                return Text(
+                    "No quote found"); // Handle the case when no data is returned
+              }
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
