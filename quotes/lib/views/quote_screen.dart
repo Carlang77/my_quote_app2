@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quotes/controllers/quote_controller.dart';
 import 'package:quotes/views/quote_widget.dart';
+import 'package:quotes/repository/database_helper.dart';
 import 'package:quotes/models/quote_model.dart';
 import 'package:quotes/liked_quotes_screen.dart';
 import 'package:share/share.dart'; // Import the share package
@@ -12,54 +13,68 @@ class QuoteScreen extends StatefulWidget {
 
 class _QuoteScreenState extends State<QuoteScreen> {
   final QuoteController _controller = QuoteController();
-  QuoteModel? currentQuote;
-  final List<QuoteModel> likedQuotes = []; // List to store liked quotes
+  QuoteModel? currentQuote; // The currently displayed quote
+  final List<QuoteModel> likedQuotes = []; // List of liked quotes
 
   @override
   void initState() {
     super.initState();
-    _reloadQuote();
+    _loadLikedQuotes(); // Load liked quotes from the database
+    _reloadQuote(); // Load a new quote when the screen initializes
   }
 
   Future<void> _reloadQuote() async {
     try {
-      var newQuote = await _controller.fetchQuote();
+      var newQuote = await _controller.fetchQuote(); // Fetch a new quote
       setState(() {
-        currentQuote = newQuote;
+        currentQuote = newQuote; // Update the displayed quote
       });
     } catch (error) {
       print('Error fetching quote: $error');
       setState(() {
+        // Display a default quote if there's an error fetching a new one
         currentQuote = QuoteModel(
-            content:
-                "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote.",
-            author: "Carlang :)",
-            isLiked: false);
+          content:
+              "Sorry. Your internet connection is buggy at the moment. And no. This is not a quote.",
+          author: "Carlang :)",
+          isLiked: false,
+        );
       });
     }
   }
 
-  Future<QuoteModel?> _fetchQuote() async {
-    try {
-      return await _controller.fetchQuote();
-    } catch (error) {
-      print('Error fetching quote: $error');
-      return null;
-    }
+  Future<void> _loadLikedQuotes() async {
+    final liked = await DatabaseHelper.instance
+        .getQuotes(); // Load liked quotes from the database
+    setState(() {
+      likedQuotes.clear(); // Clear existing liked quotes
+      likedQuotes.addAll(liked); // Add loaded liked quotes to the list
+    });
   }
 
-  void _toggleLike() {
-    setState(() {
-      if (currentQuote != null) {
-        currentQuote!.isLiked = !currentQuote!.isLiked;
-        if (currentQuote!.isLiked) {
-          likedQuotes.add(currentQuote!);
-        } else {
-          likedQuotes
-              .removeWhere((quote) => quote.content == currentQuote!.content);
+  Future<void> _toggleLike() async {
+    try {
+      setState(() {
+        if (currentQuote != null) {
+          currentQuote!.isLiked =
+              !currentQuote!.isLiked; // Toggle like status of the current quote
+          if (currentQuote!.isLiked) {
+            likedQuotes.add(currentQuote!); // Add the liked quote to the list
+            DatabaseHelper.instance
+                .addQuote(currentQuote!); // Add the liked quote to the database
+          } else {
+            likedQuotes.removeWhere((quote) =>
+                quote.content ==
+                currentQuote!
+                    .content); // Remove the unliked quote from the list
+            DatabaseHelper.instance.deleteQuote(
+                currentQuote!); // Delete the unliked quote from the database
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      print('Error saving liked quote: $error');
+    }
   }
 
   @override
@@ -75,7 +90,7 @@ class _QuoteScreenState extends State<QuoteScreen> {
                 'Daily Quotes',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 40, // Adjust the font size if needed
+                  fontSize: 40,
                   color: Colors.black,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -95,8 +110,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      LikedQuotesScreen(likedQuotes: likedQuotes),
+                  builder: (context) => LikedQuotesScreen(
+                      likedQuotes:
+                          likedQuotes), // Navigate to the LikedQuotesScreen
                 ),
               );
             },
@@ -108,7 +124,7 @@ class _QuoteScreenState extends State<QuoteScreen> {
                 Share.share(
                   '${currentQuote!.content} - ${currentQuote!.author}',
                   subject: 'Quote from Daily Quote App',
-                );
+                ); // Share the current quote
               }
             },
           ),
@@ -126,14 +142,17 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       width: 80,
                       height: 80,
                     ),
-                    QuoteWidget(quote: currentQuote, onLiked: _toggleLike),
+                    QuoteWidget(
+                        quote: currentQuote,
+                        onLiked: _toggleLike), // Display the current quote
                   ],
                 )
-              : CircularProgressIndicator(),
+              : CircularProgressIndicator(), // Show a loading indicator if there's no current quote
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _reloadQuote,
+        onPressed:
+            _reloadQuote, // Reload a new quote when the button is pressed
         child: Icon(Icons.refresh),
       ),
     );

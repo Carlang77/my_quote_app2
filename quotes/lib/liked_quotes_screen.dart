@@ -14,8 +14,7 @@ class LikedQuotesScreen extends StatelessWidget {
         title: Text('Liked Quotes'),
       ),
       body: Container(
-        margin:
-            EdgeInsets.symmetric(horizontal: 16), // Add left and right margins
+        margin: EdgeInsets.symmetric(horizontal: 16),
         child: ListView.builder(
           itemCount: likedQuotes.length,
           itemBuilder: (context, index) {
